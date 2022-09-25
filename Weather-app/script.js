@@ -11,6 +11,9 @@ let cityvalue = "Bengaluru";
 // API URL
 let currentdate;
 let cityname;
+let lat;
+let lon;
+let ampm;
 var searchbox = document.getElementById("searchbox");
 searchbox.addEventListener("keydown", function (e) {
     if (e.code === "Enter") {  //checks whether the pressed key is "Enter"
@@ -18,19 +21,35 @@ searchbox.addEventListener("keydown", function (e) {
     }
 });
 
+function changeTimezone(date, ianatz) {
+
+    // suppose the date is 12:00 UTC
+    var invdate = new Date(date.toLocaleString('en-US', {
+        timeZone: ianatz
+    }));
+
+    // then invdate will be 07:00 in Toronto
+    // and the diff is 5 hours
+    var diff = date.getTime() - invdate.getTime();
+
+    // so 12:00 in Toronto is 17:00 UTC
+    return new Date(date.getTime() - diff); // needs to substract
+
+}
+
 function getweather(check) {
-    if (check)
-    {
+    if (check) {
         cityname = cityvalue;
     }
-    else
-    {
+    else {
         cityname = document.getElementsByClassName("search-box")[0].value;
     }
-    const timeElapsed = Date.now();
-    const today = new Date(timeElapsed);
-    currentdate=today.toDateString();
-    console.log(cityname);
+    // const timeElapsed = Date.now();
+    // const today = new Date(timeElapsed);
+
+
+
+    // console.log(cityname);
     const base = `http://api.openweathermap.org/data/2.5/weather?q=${cityname}&appid=6d055e39ee237af35ca066f35474e9df`;
     // Calling the API
     fetch(base)
@@ -39,20 +58,48 @@ function getweather(check) {
         })
         .then((data) => {
             console.log(data);
-            console.log(data.name + ", " + data.sys.country);
+            // console.log(data.name + ", " + data.sys.country);
             city.textContent = data.name + ", " + data.sys.country;
-            date.textContent=currentdate;
+
             temperature.textContent = Math.floor(data.main.temp - kelvin) + "°C";
             summary.textContent = data.weather[0].description;
             hi_low.textContent = Math.floor(data.main.temp_min - kelvin) + "°C" + "/" + Math.floor(data.main.temp_max - kelvin) + "°C"
+
+            lat = data.coord.lat;
+            lon = data.coord.lon;
+            timezoneapi = "https://api.wheretheiss.at/v1/coordinates/" + lat + "," + lon;
+            fetch(timezoneapi)
+                .then((response) => {
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log(data);
+                    const here = new Date();
+                    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                    // console.log();
+                    convertedDatetime = changeTimezone(here, data.timezone_id);
+                    hours = convertedDatetime.getHours();
+                    let hh;
+                    if (hours > 12) {
+                        ampm = "PM";
+                        hh = hours - 12;
+                    }
+                    else if (hours == 0) {
+                        ampm = "AM";
+                        hh = 12;
+                    }
+                    else {
+                        ampm = "AM";
+                        hh = hours;
+                    }
+                    currentdate = days[convertedDatetime.getDay()] + ", " + convertedDatetime.getDate() + " " + months[convertedDatetime.getMonth()] + " " + convertedDatetime.getFullYear() + ", " + hh + ":" + convertedDatetime.getMinutes() + " " + ampm;
+                    date.textContent = currentdate;
+                });
         });
 }
 window.addEventListener("load", () => {
     getweather(true);
-
-
-
-
 });
 
 
