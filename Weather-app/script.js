@@ -60,9 +60,33 @@ function getweather(check) {
             console.log(data);
             // console.log(data.name + ", " + data.sys.country);
             city.textContent = data.name + ", " + data.sys.country;
-
+            weather_details=data.weather[0].description;
+            if(weather_details.indexOf('clouds')!=-1)
+            {
+                document.body.style.backgroundImage = "url('clouds.jpg')";
+            }
+            else if(weather_details.indexOf('rain')!=-1)
+            {
+                document.body.style.backgroundImage = "url('rain.jpg')";
+            }
+            else if(weather_details.indexOf('sunny')!=-1)
+            {
+                document.body.style.backgroundImage = "url('sunny.jpg')";
+            }
+            else if(weather_details.indexOf('clear sky')!=-1)
+            {
+                document.body.style.backgroundImage = "url('clearsky.jpg')";
+            }
+            else if(weather_details.indexOf('haze')!=-1 || weather_details.indexOf('mist')!=-1)
+            {
+                document.body.style.backgroundImage = "url('haze.jpg')";
+            }
+            else 
+            {
+                document.body.style.backgroundImage = "url('bg.jpg')";
+            }
             temperature.textContent = Math.floor(data.main.temp - kelvin) + "°C";
-            summary.textContent = data.weather[0].description;
+            summary.textContent = weather_details;
             hi_low.textContent = Math.floor(data.main.temp_min - kelvin) + "°C" + "/" + Math.floor(data.main.temp_max - kelvin) + "°C"
 
             lat = data.coord.lat;
@@ -100,6 +124,10 @@ function getweather(check) {
 }
 window.addEventListener("load", () => {
     getweather(true);
+
+
+
+
 });
 
 
